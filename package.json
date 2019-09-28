@@ -24,6 +24,9 @@
     "loading",
     "button"
   ],
+  "publishConfig": {
+    "registry":"https://npm.pkg.github.com/"
+  },
   "devDependencies": {
     "@react-native-community/eslint-config": "^0.0.5",
     "babel-eslint": "^10.0.3",
