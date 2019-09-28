@@ -4,7 +4,8 @@
   "description": "React Native Animated Loading Button",
   "main": "src/index.js",
   "scripts": {
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "test": "jest --passWithNoTests"
   },
   "author": "Philip Bui",
   "license": "MIT",
@@ -38,6 +39,7 @@
     "eslint-plugin-prettier": "^3.1.1",
     "eslint-plugin-react": "^7.16.0",
     "eslint-plugin-react-native": "^3.8.1",
+    "jest": "^24.9.0",
     "prettier": "^1.18.2",
     "prop-types": "^15.7.2",
     "react": "^16.11.0",
@@ -91,5 +93,8 @@
         }
       ]
     }
+  },
+  "jest": {
+    "preset": "react-native"
   }
 }
