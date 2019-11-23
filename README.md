@@ -1,11 +1,11 @@
 # React Native Animated Loading Button
 [![Actions Status](https://github.com/philip-bui/react-native-animated-loading-button/workflows/build/badge.svg)](https://github.com/philip-bui/react-native-animated-loading-button/actions)
+[![npm](https://img.shields.io/npm/v/react-native-animated-loading-button.svg?style=flat)](https://www.npmjs.com/package/react-native-animated-loading-button)
+![Downloads](https://img.shields.io/npm/dt/react-native-animated-loading-button.svg?style=flat)
 
 React Native Animated Loading Button is a button component that animates to a loading button and vice versa.
 
 ## Installation
-
-Authenticate to GitHub Package Registry using either a .npmrc file or with npm login. For more information, see "[Authenticating to GitHub Package Registry](https://help.github.com/en/github/managing-packages-with-github-package-registry/configuring-npm-for-use-with-github-package-registry#authenticating-to-github-package-registry)."
 
 ```bash
 $ npm install react-native-animated-loading-button
