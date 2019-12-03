@@ -1,6 +1,9 @@
 name: publish
 
-on: [push]
+on:
+  push:
+    tags:
+    - '*'
 
 jobs:
   publish:
@@ -14,10 +17,4 @@ jobs:
     - run: yarn install
     - run: yarn publish
       env:
-        NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
-    - uses: actions/setup-node@v1
-      with:
-        registry-url: 'https://npm.pkg.github.com'
-    - run: yarn publish
-      env:
-        NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
