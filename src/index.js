@@ -14,7 +14,14 @@ const styles = StyleSheet.create({
   container: {
     alignItems: "center"
   },
+  buttonContainer: {
+    width: "100%",
+    height: "100%",
+    overflow: "hidden"
+  },
   button: {
+    width: "100%",
+    height: "100%",
     justifyContent: "center"
   },
   title: {
@@ -32,14 +39,15 @@ const styles = StyleSheet.create({
         shadowRadius: 1
       }
     })
+  },
+  disabled: {
+    backgroundColor: "hsl(208, 8%, 90%)"
   }
 });
 
 export default class AnimatedLoadingButton extends PureComponent {
   static propTypes = {
-    width: PropTypes.number.isRequired,
-    height: PropTypes.number.isRequired,
-    borderRadius: PropTypes.number,
+    containerStyle: PropTypes.object,
     buttonStyle: PropTypes.object,
     title: PropTypes.string,
     titleStyle: PropTypes.object,
@@ -48,14 +56,26 @@ export default class AnimatedLoadingButton extends PureComponent {
     loadingProps: PropTypes.object,
     onPress: PropTypes.func.isRequired,
     TouchableComponent: PropTypes.element,
-    raised: PropTypes.bool
+    duration: PropTypes.number,
+    raised: PropTypes.bool,
+    disabled: PropTypes.bool,
+    disabledStyle: PropTypes.object
   };
 
   static defaultProps = {
-    borderRadius: 0,
-    buttonStyle: {},
+    containerStyle: {
+      width: "100%",
+      height: 50
+    },
+    buttonStyle: {
+      backgroundColor: "#424242",
+      borderRadius: 4,
+      paddingHorizontal: 16
+    },
     title: "Button",
-    titleStyle: {},
+    titleStyle: {
+      color: "white"
+    },
     titleProps: {},
     loadingStyle: {},
     loadingProps: {},
@@ -63,60 +83,75 @@ export default class AnimatedLoadingButton extends PureComponent {
       android: TouchableNativeFeedback,
       default: TouchableOpacity
     }),
-    raised: false
+    duration: 400,
+    raised: false,
+    disabled: false,
+    disabledStyle: {}
   };
 
   state = {
     loading: false
   };
 
+  // We want to turn any percentages into a numeric width.
+  containerWidth = 3000;
+
+  // We want to turn any percentages into a numeric height.
+  containerHeight = 3000;
+
   constructor(props) {
     super(props);
+    const { borderRadius } = props.buttonStyle;
 
     this.loadingValue = {
-      width: new Animated.Value(props.width),
-      borderRadius: new Animated.Value(props.borderRadius),
+      maxWidth: new Animated.Value(this.containerWidth),
+      borderRadius: new Animated.Value(borderRadius || 0),
       opacity: new Animated.Value(1)
     };
   }
 
-  setLoading(loading) {
-    const { width, height, borderRadius } = this.props;
+  get borderRadius() {
+    const { buttonStyle } = this.props;
+    return buttonStyle.borderRadius || 0;
+  }
+
+  setLoading = loading => {
+    const { duration } = this.props;
     if (loading) {
-      this.animateButton(width, height, borderRadius, height / 2, 1, 0);
-      this.setState({ loading });
-    } else {
+      this.animateButton(this.containerHeight, this.containerHeight / 2, 0);
       setTimeout(() => {
-        this.animateButton(height, width, height / 2, borderRadius, 0, 1);
         this.setState({ loading });
-      }, 1000);
+      }, duration);
+    } else {
+      this.animateButton(this.containerWidth, this.borderRadius, 1);
+      this.setState({ loading });
     }
+  };
+
+  animateButton(maxWidthEnd, borderRadiusEnd, opacityEnd) {
+    const { duration } = this.props;
+    const { maxWidth, opacity, borderRadius } = this.loadingValue;
+
+    Animated.timing(maxWidth, {
+      toValue: maxWidthEnd,
+      duration
+    }).start();
+    Animated.timing(borderRadius, {
+      toValue: borderRadiusEnd,
+      duration
+    }).start();
+    Animated.timing(opacity, { toValue: opacityEnd, duration }).start();
   }
 
-  animateButton(
-    widthStart,
-    widthEnd,
-    borderRadiusStart,
-    borderRadiusEnd,
-    opacityStart,
-    opacityEnd
-  ) {
-    const { width, opacity, borderRadius } = this.loadingValue;
-    if (width.toValue !== widthEnd) {
-      width.setValue(widthStart);
-      opacity.setValue(opacityStart);
-      borderRadius.setValue(borderRadiusStart);
-
-      Animated.parallel([
-        Animated.timing(width, { toValue: widthEnd, duration: 400 }),
-        Animated.timing(borderRadius, {
-          toValue: borderRadiusEnd,
-          duration: 400
-        }),
-        Animated.timing(opacity, { toValue: opacityEnd, duration: 300 })
-      ]).start();
+  onLayout = e => {
+    const { layout } = e.nativeEvent;
+    const { loading } = this.state;
+    this.containerWidth = layout.width;
+    this.containerHeight = layout.height;
+    if (!loading) {
+      this.loadingValue.maxWidth.setValue(this.containerWidth);
     }
-  }
+  };
 
   renderLoading() {
     const { loadingStyle, loadingProps } = this.props;
@@ -145,39 +180,48 @@ export default class AnimatedLoadingButton extends PureComponent {
   render() {
     const { loading } = this.state;
     const {
-      onPress,
-      height,
-      buttonStyle,
+      containerStyle,
       TouchableComponent,
+      onPress,
+      buttonStyle,
       raised,
-      ...attributes
+      disabled,
+      disabledStyle,
+      ...props
     } = this.props;
-    const { width, borderRadius } = this.loadingValue;
+    const { maxWidth, borderRadius } = this.loadingValue;
+    // The container will help calculate the layout width and height.
+    // The animated view will help animate the restricted maxWidth, borderRadius.
     return (
-      <View style={styles.container}>
-        <TouchableComponent
-          onPress={!loading ? onPress : null}
-          delayPressIn={0}
-          activeOpacity={0.3}
-          accessibilityRole="button"
-          accessibilityStates={[...(loading ? ["busy"] : [])]}
-          {...attributes}
+      <View style={[styles.container, containerStyle]} onLayout={this.onLayout}>
+        <Animated.View
+          style={StyleSheet.flatten([
+            styles.buttonContainer,
+            {
+              maxWidth,
+              borderRadius
+            }
+          ])}
         >
-          <Animated.View
+          <TouchableComponent
             style={StyleSheet.flatten([
               styles.button,
-              {
-                width,
-                height,
-                borderRadius
-              },
+              raised && styles.raised,
               buttonStyle,
-              raised && styles.raised
+              disabled && styles.disabled,
+              disabled && disabledStyle
             ])}
+            onPress={onPress}
+            disabled={loading}
+            delayPressIn={0}
+            activeOpacity={0.3}
+            accessibilityRole="button"
+            accessibilityStates={[...(loading ? ["busy"] : [])]}
+            {...props}
           >
             {loading ? this.renderLoading() : this.renderTitle()}
-          </Animated.View>
-        </TouchableComponent>
+          </TouchableComponent>
+        </Animated.View>
       </View>
     );
   }
