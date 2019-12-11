@@ -204,13 +204,6 @@ export default class AnimatedLoadingButton extends PureComponent {
           ])}
         >
           <TouchableComponent
-            style={StyleSheet.flatten([
-              styles.button,
-              raised && styles.raised,
-              buttonStyle,
-              disabled && styles.disabled,
-              disabled && disabledStyle
-            ])}
             onPress={onPress}
             disabled={loading}
             delayPressIn={0}
@@ -219,7 +212,17 @@ export default class AnimatedLoadingButton extends PureComponent {
             accessibilityStates={[...(loading ? ["busy"] : [])]}
             {...props}
           >
-            {loading ? this.renderLoading() : this.renderTitle()}
+            <View
+              style={StyleSheet.flatten([
+                styles.button,
+                raised && styles.raised,
+                buttonStyle,
+                disabled && styles.disabled,
+                disabled && disabledStyle
+              ])}
+            >
+              {loading ? this.renderLoading() : this.renderTitle()}
+            </View>
           </TouchableComponent>
         </Animated.View>
       </View>
