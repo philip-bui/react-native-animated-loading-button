@@ -77,7 +77,9 @@ export default class AnimatedLoadingButton extends PureComponent {
       color: "white"
     },
     titleProps: {},
-    loadingStyle: {},
+    loadingStyle: {
+      color: "white"
+    },
     loadingProps: {},
     TouchableComponent: Platform.select({
       android: TouchableNativeFeedback,
@@ -187,6 +189,7 @@ export default class AnimatedLoadingButton extends PureComponent {
       raised,
       disabled,
       disabledStyle,
+      titleStyle,
       ...props
     } = this.props;
     const { maxWidth, borderRadius } = this.loadingValue;
@@ -210,6 +213,14 @@ export default class AnimatedLoadingButton extends PureComponent {
             activeOpacity={0.3}
             accessibilityRole="button"
             accessibilityStates={[...(loading ? ["busy"] : [])]}
+            background={
+              Platform.OS === "android" && Platform.Version >= 21
+                ? TouchableNativeFeedback.Ripple(
+                    titleStyle.color || "white",
+                    false
+                  )
+                : undefined
+            }
             {...props}
           >
             <View
